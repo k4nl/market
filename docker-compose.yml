@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:14.5-alpine
+    container_name: market-postgres
+    working_dir: /application
+    volumes:
+      - postgres:/data/postgres
+      - .:/application
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - PGDATA=/data/postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=market
+      - PGHOST=localhost
+      - PGPORT=5432
+    ports:
+      - 5432:5432
+
+  web:
+    build: .
+    ports:
+      - 3000:3000
+    container_name: market-backend
+    command: npm run start:dev
+    volumes:
+      - .:/usr/app
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=market
+
+volumes:
+  postgres:
